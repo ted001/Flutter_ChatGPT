@@ -27,6 +27,9 @@ class MessageList extends StateNotifier<List<Message>> {
           content: msg.content + partialMessage.content);
     }
     logger.d("message id ${message.toString()}");
+    if(!message.isUser) {
+      tts.speak(message.content);
+    }
     // update db
     db.messageDao.upsertMessage(message);
 

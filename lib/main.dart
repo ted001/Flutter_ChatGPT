@@ -7,6 +7,7 @@ import 'router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupDatabse();
+  initTTS();
   runApp(const ProviderScope(child: MyApp()));
 }
 
