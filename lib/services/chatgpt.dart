@@ -1,5 +1,7 @@
 import 'package:chatgpt/env.dart';
+import 'package:chatgpt/models/message.dart';
 import 'package:openai_api/openai_api.dart';
+import 'package:tiktoken/tiktoken.dart';
 
 class ChatGPTService {
   final client = OpenaiClient(
@@ -19,18 +21,15 @@ class ChatGPTService {
   }
 
   Future streamChat(
-    String content, {
+    List<Message> messages, {
     Function(String text)? onSuccess,
+    Model model = Model.gpt3_5Turbo,
   }) async {
     final request = ChatCompletionRequest(
-        model: Model.gpt3_5Turbo,
-        stream: true,
-        messages: [
-          ChatMessage(
-            content: content,
-            role: ChatMessageRole.user,
-          )
-        ]);
+      model: model,
+      stream: true,
+      messages: messages.toChatMessages().limitMessages(),
+    );
     return await client.sendChatCompletionStream(
       request,
       onSuccess: (p0) {
@@ -40,5 +39,40 @@ class ChatGPTService {
         }
       },
     );
+  }
+}
+
+final maxTokens = {
+  Model.gpt3_5Turbo: 4096,
+  Model.gpt4: 8192,
+};
+
+extension on List<ChatMessage> {
+  List<ChatMessage> limitMessages({Model model = Model.gpt3_5Turbo}) {
+    assert(maxTokens[model] != null, 'Model not supported');
+    var messages = <ChatMessage>[];
+    final encoding = encodingForModel(model.value);
+    final maxToken = maxTokens[model]!;
+    var count = 0;
+    if (isEmpty) return messages;
+    for (var i = length - 1; i >= 0; i--) {
+      final m = this[i];
+      count = count + encoding.encode(m.role.toString() + m.content).length;
+      if (count <= maxToken) {
+        messages.insert(0, m);
+      }
+    }
+    return messages;
+  }
+}
+
+extension on List<Message> {
+  List<ChatMessage> toChatMessages() {
+    return map(
+      (e) => ChatMessage(
+        content: e.content,
+        role: e.isUser ? ChatMessageRole.user : ChatMessageRole.assistant,
+      ),
+    ).toList();
   }
 }
