@@ -1,16 +1,17 @@
-# fluter_chatgpt
+# Fluter chatgpt client
 
 A new Flutter project.
 
-## Getting Started
+## Main Features
+- Integrate ChatGPT API;
+- Connect to ChatGPT Stream API;
+- Support Markdown messages;
+- Locally store and view chat records;
+- Integrate Whisper API for speech-to-text conversion;
+- Customize chat bubbles.
 
-This project is a starting point for a Flutter application.
+## Screenshots
 
-A few resources to get you started if this is your first Flutter project:
+![image](https://github.com/ted001/Flutter_ChatGPT/assets/8579944/003da5c0-f5b1-4984-afac-2fd4fe98844f)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![image](https://github.com/ted001/Flutter_ChatGPT/assets/8579944/7733a60f-f6b8-43d0-b45d-930cd26cf13d)
