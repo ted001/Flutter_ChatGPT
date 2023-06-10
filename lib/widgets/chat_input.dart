@@ -51,40 +51,41 @@ class AudioInputWidget extends HookConsumerWidget {
       height: 36,
       child: transcripting.value || uiState.requestLoading
           ? ElevatedButton(
-              onPressed: null,
-              child:
-                  Text(transcripting.value ? "Transcripting..." : "Loading..."))
+          onPressed: null,
+          child:
+          Text(transcripting.value ? "Transcripting..." : "Loading..."))
           : GestureDetector(
-              onLongPressStart: (details) {
-                recording.value = true;
-                recorder.start();
-              },
-              onLongPressEnd: (details) async {
-                recording.value = false;
-                final path = await recorder.stop();
-                if (path != null) {
-                  try {
-                    transcripting.value = true;
-                    final text = await chatgpt.speechToText(path);
-                    transcripting.value = false;
-                    if (text.trim().isNotEmpty) {
-                      await __sendMessage(ref, text);
-                    }
-                  } catch (err) {
-                    logger.e("err: $err", err);
-                    transcripting.value = false;
-                  }
-                }
-              },
-              onLongPressCancel: () {
-                recording.value = false;
-                recorder.stop();
-              },
-              child: ElevatedButton(
-                onPressed: () {},
-                child: Text(recording.value ? "Recording..." : "Hold to speak"),
-              ),
-            ),
+        onLongPressStart: (details) {
+          recording.value = true;
+          recorder.start();
+        },
+        onLongPressEnd: (details) async {
+          recording.value = false;
+          final path = await recorder.stop();
+          if (path != null) {
+            try {
+              transcripting.value = true;
+              final text =
+              await chatgpt.speechToText(Uri.parse(path).path);
+              transcripting.value = false;
+              if (text.trim().isNotEmpty) {
+                await __sendMessage(ref, text);
+              }
+            } catch (err) {
+              logger.e("err: $err", err);
+              transcripting.value = false;
+            }
+          }
+        },
+        onLongPressCancel: () {
+          recording.value = false;
+          recorder.stop();
+        },
+        child: ElevatedButton(
+          onPressed: () {},
+          child: Text(recording.value ? "Recording..." : "Hold to speak"),
+        ),
+      ),
     );
   }
 }
@@ -97,25 +98,38 @@ class TextInputWidget extends HookConsumerWidget {
     final controller = useTextEditingController();
     final uiState = ref.watch(chatUiProvider);
     return TextField(
-      enabled: !uiState.requestLoading,
       controller: controller,
       decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          hintText: 'Type a message', // 显示在输入框内的提示文字
-          suffixIcon: IconButton(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        hintText: 'Type a message...', // 显示在输入框内的提示文字
+        suffixIcon: SizedBox(
+          width: 40,
+          child: uiState.requestLoading
+              ? const Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            ),
+          )
+              : IconButton(
             onPressed: () {
               // 这里处理发送事件
-              if (controller.text.isNotEmpty) {
+              if (controller.text.trim().isNotEmpty) {
                 _sendMessage(ref, controller);
               }
             },
             icon: const Icon(
               Icons.send,
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -146,18 +160,18 @@ __sendMessage(WidgetRef ref, String content) async {
   }
 
   ref.read(messageProvider.notifier).upsertMessage(
-        message.copyWith(sessionId: sessionId),
-      ); // 添加消息
+    message.copyWith(sessionId: sessionId),
+  ); // 添加消息
 
   _requestChatGPT(ref, content, sessionId: sessionId);
 }
 
 Message _createMessage(
-  String content, {
-  String? id,
-  bool isUser = true,
-  int? sessionId,
-}) {
+    String content, {
+      String? id,
+      bool isUser = true,
+      int? sessionId,
+    }) {
   final message = Message(
     id: id ?? uuid.v4(),
     content: content,
@@ -169,10 +183,10 @@ Message _createMessage(
 }
 
 _requestChatGPT(
-  WidgetRef ref,
-  String content, {
-  int? sessionId,
-}) async {
+    WidgetRef ref,
+    String content, {
+      int? sessionId,
+    }) async {
   final uiState = ref.watch(chatUiProvider);
   ref.read(chatUiProvider.notifier).setRequestLoading(true);
   final messages = ref.watch(activeSessionMessagesProvider);
@@ -184,7 +198,7 @@ _requestChatGPT(
       model: activeSession?.model.toModel() ?? uiState.model,
       onSuccess: (text) {
         final message =
-            _createMessage(text, id: id, isUser: false, sessionId: sessionId);
+        _createMessage(text, id: id, isUser: false, sessionId: sessionId);
         ref.read(messageProvider.notifier).upsertMessage(message);
       },
     );

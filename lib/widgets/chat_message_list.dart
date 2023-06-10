@@ -82,7 +82,7 @@ class ReceivedMessageItem extends StatelessWidget {
           width: 8,
         ),
         CustomPaint(
-          painter: Triangle(backgroundColor),
+          painter: Triagnle(backgroundColor),
         ),
         Flexible(
           child: Container(
@@ -135,7 +135,7 @@ class SentMessageItem extends StatelessWidget {
           ),
         ),
         CustomPaint(
-          painter: Triangle(backgroundColor),
+          painter: Triagnle(backgroundColor),
         ),
         const SizedBox(
           width: 8,
@@ -188,10 +188,10 @@ class MessageContentWidget extends StatelessWidget {
   }
 }
 
-class Triangle extends CustomPainter {
+class Triagnle extends CustomPainter {
   final Color bgColor;
 
-  Triangle(this.bgColor);
+  Triagnle(this.bgColor);
 
   @override
   void paint(Canvas canvas, Size size) {
